@@ -6,7 +6,7 @@
 
 <template>
   <div class="basic-layout">
-    <header>
+    <!-- <header>
       <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
       <div class="wrapper">
@@ -17,11 +17,19 @@
           <RouterLink to="/about">About</RouterLink>
         </nav>
       </div>
-    </header>
+    </header> -->
     <div class="layout-root">
       <router-view></router-view>
     </div>
-  </div>
+    <div class="footer">
+      <p>
+        This game by DuyQk -
+        <a href="https://facebook.com/quangkhuongduy" target="_blank">
+          contact me
+        </a>
+      </p>
+    </div>
+  </div>s
 </template>
 
 <style scoped lang="scss">

@@ -1,6 +1,7 @@
 .basic-layout {
   display: flex;
   flex-direction: column;
+  background-color: #7e405f;
 }
 header {
   line-height: 1.5;
@@ -62,4 +63,23 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  /* Height of the footer*/
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+.footer p a {
+  color: var(--color-text);
+  text-decoration: none;
+  margin-left: 0.5rem;
+  color: #b19900;
 }
