@@ -1,36 +1,59 @@
 <template>
-    <div class="card" :class="{ 'is-flipped': isFlipped }"
-        :style="{ width: `${cardSize.width}px`, height: `${cardSize.height}px` }" @click="onFlipCard">
+    <div class="card" :class="{ 'is-flipped': isOpen }"
+        :style="{ width: `${cardSize.width}px`, height: `${cardSize.height}px` }" @click="onFlipCard(item)">
         <div class="card-face card-face-front">
             <img src="@/assets/images/icon_back.png" alt="Card image">
         </div>
         <div class="card-face card-face-back">
-            <img :src="image" alt="Card image">
+            <img :src="getImage" alt="Card image">
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, onMounted, computed } from 'vue';
-const isFlipped = ref(false);
+import { ref, defineProps, defineEmits, onMounted, computed, onUpdated } from 'vue';
+// const isFlipped = ref(false);
 
-const emit = defineEmits(['flip-card']);
+const emit = defineEmits(['flip-card', 'flip-card-complete']);
+
+// define props
 const props = defineProps({
     cardSize: {
         type: Object,
         required: true,
     },
-    image: {
-        type: String,
-        default: 'src/assets/images/1.png',
+    item: {
+        type: Object,
+        required: true,
     },
 });
 
-function onFlipCard() {
-    console.log('Flip card');
-    emit('flip-card');
-    isFlipped.value = !isFlipped.value;
+
+// define computed/watched properties
+const getImage = computed(() => {
+    return `src/assets/images/${props.item.image}.png`;
+});
+
+const isOpen = computed(() => {
+    return props.item.isOpen || props.item.isMatch;
+});
+
+// define function
+function onFlipCard(image) {
+    emit('flip-card', image);
+    // isFlipped.value = !isFlipped.value;
+    timeoutFunction(image);
 }
+let timeoutId = null;
+function timeoutFunction(image) {
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
+        emit('flip-card-complete', image);
+    }, 600)
+}
+
 
 </script>
 

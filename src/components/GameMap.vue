@@ -1,6 +1,6 @@
 
 <script setup>
-import { ref, defineProps, defineEmits, onMounted, computed } from 'vue';
+import { ref, defineProps, defineEmits, onMounted, computed, watch, onBeforeMount } from 'vue';
 import CardItem from '@/components/CardItem.vue';
 
 const emit = defineEmits(['close-game']);
@@ -8,19 +8,62 @@ const height = ref(0);
 const width = ref(0);
 // use to set/get the value of the ref element from `the template
 const gameContentDiv = ref(null);
-const cardSize = ref({ width: 0, height: 0, cardWith: 0, cardHeight: 0 });
 
+const gameMap = ref([]);
+
+// define the props
 const props = defineProps({
     mapSize: {
         type: Number,
     },
 });
 
+// define the computed/watched properties
+const onResize = computed(() => {
+    return calculateCardSize();
+})
+
+// circular dependency
+// onBeforeMount(() => {
+// })
+
+onMounted(() => {
+    console.log('Mounted');
+    width.value = gameContentDiv.value.offsetWidth;
+    height.value = gameContentDiv.value.offsetHeight;
+    genMap();
+})
+
+// define function 
 function closeGame() {
     console.log('Close game');
     emit('close-game');
 }
 
+function genMap() {
+    const maps = [];
+    const tmpMaps = [];
+    const size = props.mapSize;
+    const length = (size * size) / 2;
+    const numbers = Array.from({ length: length }, (_, i) => i + 1).concat(Array.from({ length: length }, (_, i) => i + 1));
+    const shuffledNumbers = numbers.sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < size; i++) {
+        maps[i] = [];
+        tmpMaps[i] = [];
+        for (let j = 0; j < size; j++) {
+            const img = shuffledNumbers[i * size + j];
+            tmpMaps[i][j] = shuffledNumbers[i * size + j];
+            maps[i][j] = {
+                image: img,
+                isOpen: false,
+                isMatch: false,
+            }
+        }
+    }
+    gameMap.value = maps;
+    console.log(tmpMaps);
+}
 
 function calculateCardSize() {
     let widthDiv = width.value;
@@ -32,16 +75,51 @@ function calculateCardSize() {
     const size = { width: min, height: min, cardWith: wCard * 0.9, cardHeight: wCard * 0.9 };
     return size;
 }
+const itemFirst = ref(null);
+function onFlipCard(itemSelected) {
+    const indexSelected = getIndexOf(itemSelected);
+    itemSelected.isOpen = true;
+    gameMap.value[indexSelected[0]][indexSelected[1]] = itemSelected;
+}
 
-const onResize = computed(() => {
-    return calculateCardSize();
-})
+function onFlipCardComplete(itemSelected) {
+    if (itemFirst.value === null) {
+        itemFirst.value = itemSelected;
+    } else {
+        const indexSelected = getIndexOf(itemSelected);
+        const indexFirst = getIndexOf(itemFirst.value);
+        if (indexSelected[0] === indexFirst[0] && indexSelected[1] === indexFirst[1])
+            return;
 
-onMounted(() => {
-    // calculateCardSize();
-    width.value = gameContentDiv.value.offsetWidth;
-    height.value = gameContentDiv.value.offsetHeight;
-})
+        if (itemFirst.value.image === itemSelected.image) {
+            itemFirst.value.isMatch = true;
+            itemSelected.isMatch = true;
+        } else {
+            itemFirst.value.isOpen = false;
+            itemSelected.isOpen = false;
+        }
+        console.log(indexFirst);
+        gameMap.value[indexFirst[0]][indexFirst[1]] = itemFirst.value;
+        gameMap.value[indexSelected[0]][indexSelected[1]] = itemSelected;
+        itemFirst.value = null;
+    }
+}
+
+function getIndexOf(item) {
+    let index = [-1, -1];
+    const target = item;
+    const array = gameMap.value;
+    for (let i = 0; i < array.length; i++) {
+        for (let j = 0; j < array[i].length; j++) {
+            if (array[i][j] === target) {
+                index = [i, j];
+                break;
+            }
+        }
+        if (index[0] !== -1) break;
+    }
+    return index;
+}
 
 </script>
 
@@ -53,8 +131,9 @@ onMounted(() => {
         </div>
         <div class="game-content" ref="gameContentDiv">
             <div class="test" :style="{ width: `${onResize.width}px`, height: `${onResize.height}px` }">
-                <div class="col-map" v-for="i in mapSize">
-                    <card-item v-for="i in mapSize" :cardSize="{ width: onResize.cardWith, height: onResize.cardHeight }" />
+                <div class="col-map" v-for="items in gameMap">
+                    <card-item v-for="item in items" :cardSize="{ width: onResize.cardWith, height: onResize.cardHeight }"
+                        :item="item" @flip-card="onFlipCard" @flip-card-complete="onFlipCardComplete" />
                 </div>
             </div>
         </div>
@@ -106,16 +185,17 @@ onMounted(() => {
 
 .col-map {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: space-around;
-    height: 100%;
+    width: 100%;
+    justify-content: space-evenly;
 }
 
 .test {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    height: 100%;
 }
 </style>
