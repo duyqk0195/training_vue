@@ -1,0 +1,52 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+.content .pokeball {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.content .pokeball .pokeball_map {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.content .pokeball .pokeball_header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 1rem;
+
+}
+
+.content .pokeball .pokeball_header .title {
+    font-size: 4.5rem;
+    padding: 0px;
+    margin: 0px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.content .pokeball .pokeball_header .subTitle, .content .pokeball .pokeball_map span {
+    font-size: 2rem;
+}
+.game-map-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
