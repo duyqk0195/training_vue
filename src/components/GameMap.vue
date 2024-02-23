@@ -2,14 +2,20 @@
 <script setup>
 import { ref, defineProps, defineEmits, onMounted, computed, watch, onBeforeMount } from 'vue';
 import CardItem from '@/components/CardItem.vue';
+import NotifyPlayer from '@/components/NotifyPlayer.vue';
+
 
 const emit = defineEmits(['close-game']);
 const height = ref(0);
 const width = ref(0);
 // use to set/get the value of the ref element from `the template
 const gameContentDiv = ref(null);
-
 const gameMap = ref([]);
+const isNotify = ref(false);
+const message = ref('You Win');
+const valueProgress = ref(10);
+const maxProgress = ref(100);
+const valueLevel = ref(1);
 
 // define the props
 const props = defineProps({
@@ -23,15 +29,32 @@ const onResize = computed(() => {
     return calculateCardSize();
 })
 
-// circular dependency
-// onBeforeMount(() => {
-// })
+const progressValue = computed(() => {
+    return valueProgress.value;
+})
 
+
+watch(valueProgress, (value) => {
+    if (value === 0) {
+        isNotify.value = true;
+        message.value = 'Game Over';
+        timeoutFunction(false);
+        return;
+    }
+    countDownTimer()
+    console.log('Timeout game', valueProgress.value, maxProgress.value);
+})
+watch(gameMap, (value) => {
+    maxProgress.value = props.mapSize * props.mapSize * 3;
+    valueProgress.value = maxProgress.value;
+})
+
+// lifecycle hook
 onMounted(() => {
     console.log('Mounted');
     width.value = gameContentDiv.value.offsetWidth;
     height.value = gameContentDiv.value.offsetHeight;
-    genMap();
+    resetGame();
 })
 
 // define function 
@@ -102,7 +125,63 @@ function onFlipCardComplete(itemSelected) {
         gameMap.value[indexFirst[0]][indexFirst[1]] = itemFirst.value;
         gameMap.value[indexSelected[0]][indexSelected[1]] = itemSelected;
         itemFirst.value = null;
+        checkWin();
     }
+}
+let timeoutId = null;
+function timeoutFunction(isLevelUp) {
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
+        if (isLevelUp) {
+            resetGame(isLevelUp);
+        }
+        else {
+            closeGame();
+        }
+    }, 3000)
+}
+
+let timeoutGameId = null;
+function countDownTimer() {
+    if (timeoutGameId) {
+        clearTimeout(timeoutGameId);
+    }
+    timeoutGameId = setTimeout(() => {
+        valueProgress.value = valueProgress.value - 1;
+    }, 1000)
+}
+
+function checkWin() {
+    let isWin = true;
+    gameMap.value.forEach((row) => {
+        row.forEach((item) => {
+            if (!item.isMatch) {
+                isWin = false;
+            }
+        })
+    })
+    if (isWin) {
+        isNotify.value = true;
+        message.value = 'You Win';
+        clearTimeout(timeoutGameId);
+        timeoutFunction(true);
+    }
+}
+
+function resetGame(isLevelUp = false) {
+    if (isLevelUp) {
+        valueLevel.value = valueLevel.value + 1;
+    } else {
+        valueLevel.value = 1;
+    }
+    genMap();
+    isNotify.value = false;
+    valueProgress.value = 100;
+    clearTimeout(timeoutId);
+    clearTimeout(timeoutGameId);
+    countDownTimer();
 }
 
 function getIndexOf(item) {
@@ -125,9 +204,16 @@ function getIndexOf(item) {
 
 <template>
     <div class="game-map">
-        <div class="header close-game">
-            <p> You Playing The Map: {{ `${mapSize}x${mapSize}` }}</p>
-            <i class="fa-solid fa-xmark" @click="closeGame"></i>
+        <div class="header">
+            <div class="close-game">
+                <i class="fa-solid fa-xmark" @click="closeGame"></i>
+                <p> You Playing Map {{ `${mapSize}x${mapSize}` }} - Level {{ valueLevel }}</p>
+            </div>
+            <div class="progress-game" :style="{ width: `${onResize.width}px` }">
+                <progress :value="progressValue" :max="maxProgress"></progress>
+                <p>{{ progressValue }}s</p>
+            </div>
+
         </div>
         <div class="game-content" ref="gameContentDiv">
             <div class="test" :style="{ width: `${onResize.width}px`, height: `${onResize.height}px` }">
@@ -137,6 +223,7 @@ function getIndexOf(item) {
                 </div>
             </div>
         </div>
+        <notify-player v-if="isNotify" :message="message" />
     </div>
 </template>
 
@@ -151,7 +238,7 @@ function getIndexOf(item) {
     padding: 20px;
 }
 
-.close-game {
+.header {
     display: flex;
     justify-content: space-between;
     flex-direction: row;
@@ -161,16 +248,25 @@ function getIndexOf(item) {
 
 }
 
-.header>i {
+.close-game {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    flex: 1;
+}
+
+.close-game>i {
     font-size: 2rem;
     align-items: center;
     margin: 0;
 }
 
-.header>p {
+.close-game>p {
     font-size: 2rem;
     align-items: center;
     margin: 0;
+    margin-left: 2rem;
 }
 
 .game-content {
@@ -197,5 +293,43 @@ function getIndexOf(item) {
     align-items: center;
     justify-content: space-around;
     height: 100%;
+}
+
+
+
+.progress-game {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+    height: 100%;
+    width: 100%;
+    flex: 1;
+}
+
+.progress-game>p {
+    font-size: 2rem;
+    margin: 0;
+    padding: 0 10px;
+    width: 10%;
+}
+
+progress {
+    border-radius: 7px;
+    width: 30%;
+    height: 100%;
+    box-shadow: 1px 1px 4px rgba(159, 231, 17, 0.2);
+    width: 25%;
+}
+
+progress::-webkit-progress-bar {
+    background-color: var(--vt-c-text-light-2);
+    border-radius: 8px;
+}
+
+progress::-webkit-progress-value {
+    background-color: #b19900;
+    border-radius: 8px;
+    box-shadow: 1px 1px 5px rgba(140, 91, 156, 0.8);
 }
 </style>
