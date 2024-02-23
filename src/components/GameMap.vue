@@ -16,6 +16,7 @@ const message = ref('You Win');
 const valueProgress = ref(10);
 const maxProgress = ref(100);
 const valueLevel = ref(1);
+const colorProgress = ref('#b9660ccc');
 
 // define the props
 const props = defineProps({
@@ -41,6 +42,8 @@ watch(valueProgress, (value) => {
         timeoutFunction(false);
         return;
     }
+    const valuePercent = value / maxProgress.value * 100;
+    colorProgress.value = valuePercent > 60 ? '#0f562fcc' : valuePercent > 40 ? '#4f560fcc' : '#56200fcc';
     countDownTimer()
     console.log('Timeout game', valueProgress.value, maxProgress.value);
 })
@@ -210,12 +213,12 @@ function getIndexOf(item) {
                 <p> You Playing Map {{ `${mapSize}x${mapSize}` }} - Level {{ valueLevel }}</p>
             </div>
             <div class="progress-game" :style="{ width: `${onResize.width}px` }">
-                <progress :value="progressValue" :max="maxProgress"></progress>
+                <progress :value="progressValue" :max="maxProgress" :color="'red'"></progress>
                 <p>{{ progressValue }}s</p>
             </div>
 
         </div>
-        <div class="game-content" ref="gameContentDiv">
+        <div class=" game-content" ref="gameContentDiv">
             <div class="test" :style="{ width: `${onResize.width}px`, height: `${onResize.height}px` }">
                 <div class="col-map" v-for="items in gameMap">
                     <card-item v-for="item in items" :cardSize="{ width: onResize.cardWith, height: onResize.cardHeight }"
@@ -328,8 +331,8 @@ progress::-webkit-progress-bar {
 }
 
 progress::-webkit-progress-value {
-    background-color: #b19900;
+    background-color: v-bind(colorProgress);
     border-radius: 8px;
-    box-shadow: 1px 1px 5px rgba(140, 91, 156, 0.8);
+    box-shadow: 1px 1px 5px #56200fcc;
 }
 </style>
