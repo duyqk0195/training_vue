@@ -2,15 +2,12 @@ import { ENV_CONFIG } from '@/core/constants/app'
 import axios, { type AxiosRequestConfig } from 'axios'
 
 const instance = axios.create({
-  baseURL: ENV_CONFIG.API_URL,
-  headers: {
-    'content-type': 'application/json'
-  }
+  baseURL: ENV_CONFIG.API_URL
 })
 
 instance.interceptors.request.use(
   async (config: any) => {
-    const token = 'your token'
+    const token = null
     if (token) {
       config.headers = {
         Authorization: `Bearer ${token}`
@@ -48,11 +45,11 @@ instance.interceptors.response.use(
 )
 
 const api = {
-  get: <T = any>(url: string, config?: AxiosRequestConfig) => {
-    return instance<T>(url, { method: 'get', url, ...config })
+  get(url: string, config?: AxiosRequestConfig) {
+    return instance.get(url, config)
   },
-  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) => {
-    return instance<T>(url, { method: 'post', url, data, ...config })
+  post(url: string, data?: any, config?: AxiosRequestConfig) {
+    return instance.post(url, data, config)
   }
 }
 

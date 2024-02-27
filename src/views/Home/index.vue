@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import TheWelcome from '@/components/TheWelcome.vue'
+import DetailRestaurant from '@/components/DetailRestaurant.vue';
+import { provide, ref } from "vue";
 
-/**
- * Page view: Home
- */
+// const carts = ref([]);
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <detail-restaurant />
   </main>
 </template>
 
