@@ -12,7 +12,7 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import RestaurantItem from '@/components/RestaurantItem.vue'
+import ProducItem from '@/components/ProducItem.vue'
 
 const vuetify = createVuetify({
   components,
@@ -20,7 +20,7 @@ const vuetify = createVuetify({
 })
 
 const app = createApp(App)
-app.component('restaurant-item', RestaurantItem)
+app.component('produc-item', ProducItem)
 app.provide('carts', [])
 
 app.use(vuetify)

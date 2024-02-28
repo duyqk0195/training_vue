@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TheWelcome from '@/components/TheWelcome.vue'
-import DetailRestaurant from '@/components/DetailRestaurant.vue';
+import TheProduc from '@/components/TheProduc.vue';
 import { provide, ref } from "vue";
 
 // const carts = ref([]);
@@ -8,7 +8,7 @@ import { provide, ref } from "vue";
 
 <template>
   <main>
-    <detail-restaurant />
+    <the-produc />
   </main>
 </template>
 

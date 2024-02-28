@@ -1,7 +1,7 @@
 
 <template>
     <v-container class="pl-0 pr-0">
-        <v-row>
+        <v-row align="center">
             <v-col cols="2" md="2" class="pl-0 pr-0">
                 <v-img width="80" height="65" :src="item.thumbnail_url"></v-img>
             </v-col>
@@ -38,9 +38,9 @@
                     {{ getOriginalPrice }}
                 </div>
             </v-col>
-            <v-col cols="auto" md="auto" align-self="center" class="pl-0 pr-0" v-if="isShowAdd">
-                <v-btn icon="mdi-open-in-new" size="x-small" @click="addToCart(item)">
-                    <i class="fas fa-plus text-danger"></i>
+            <v-col cols="auto" md="auto" align-self="center" class="pl-0 pr-0">
+                <v-btn icon="mdi-open-in-new" size="x-small" @click="onAction(item)">
+                    <slot name="iconAction"><i class="fas fa-plus text-danger"></i></slot>
                 </v-btn>
             </v-col>
             <v-divider class="border-opacity-100"></v-divider>
@@ -55,10 +55,7 @@ import { formatCurrency } from "@/core/utils/formatter";
 const props = defineProps({
     item: {
         type: Object,
-    },
-    isShowAdd: {
-        type: Boolean,
-        default: true,
+        required: true,
     },
 });
 
@@ -81,12 +78,12 @@ const getOriginalPrice = computed(() => {
     return formatCurrency(props.item.original_price);
 })
 
-const emit = defineEmits(["add-to-cart"]);
+const emit = defineEmits(["on-action",]);
 
-function addToCart(restaurant) {
-    console.log("add-to-cart")
-    emit("add-to-cart", props.item);
+function onAction(item) {
+    emit("on-action", item);
 }
+
 
 </script>
 
