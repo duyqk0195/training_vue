@@ -4,7 +4,7 @@
         <v-text-field v-model="inputValue" :loading="loading" density="compact" variant="solo" label="Search..." single-line
             hide-details>
             <template v-slot:append-inner>
-                <v-icon size="16" @click="onSearch">
+                <v-icon size="16" @click="onSearch(inputValue.value)">
                     <i class="fas fa-search"></i>
                 </v-icon>
             </template>
@@ -28,9 +28,9 @@ watch(inputValue, (newVal, oldVal) => {
     emits("on-search", newVal);
 })
 
-function onSearch() {
+function onSearch(value) {
     if (props.loading) return;
-    emits("on-search", inputValue.value);
+    emits("on-search", value);
 }
 
 </script>

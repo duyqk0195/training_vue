@@ -78,7 +78,7 @@ function checkLoadMore(paging) {
     }
 }
 
-async function onSearch(value) {
+function onSearch(value) {
     isSearchLoading.value = true;
     isShowLoadMore.value = !value;
     filter(value);
@@ -98,7 +98,7 @@ async function getRestaurant(pageValue) {
 
 
 
-async function filter(value) {
+function filter(value) {
     if (value) {
         items.value = tmp_items.value.filter(item => item.name.toLowerCase().includes(value.toLowerCase()));
     } else {

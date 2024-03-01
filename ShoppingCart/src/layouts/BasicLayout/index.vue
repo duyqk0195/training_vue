@@ -27,7 +27,7 @@ const countCart = computed(() => {
             <v-btn color="yellow-darken-4" class='text-none' variant="outlined">
 
               <template v-slot:append>
-                <v-icon size="16" @click="onSearch">
+                <v-icon size="16">
                   <!-- <i class="fas fa-search"></i> -->
                   <i class="fa-solid fa-cart-shopping"></i>
                 </v-icon>
