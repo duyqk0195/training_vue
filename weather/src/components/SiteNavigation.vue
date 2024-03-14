@@ -8,10 +8,16 @@
                 </div>
             </RouterLink>
             <div class="flex gap-3 flex-1 justify-end">
+                <i v-show="isShowAdded"
+                    class="fa-solid fa-plus text-xl hover:text-secondary duration-150 cursor-pointer" @click="addCity">
+                </i>
                 <i class="fa-solid fa-circle-info text-xl hover:text-gray-400 duration-150 cursor-pointer"
                     @click="toggleModal">
                 </i>
-                <i class="fa-solid fa-plus text-xl hover:text-secondary duration-150 cursor-pointer"></i>
+                <!-- Logout -->
+                <i v-show="isShowLogout"
+                    class="fa-solid fa-right-from-bracket text-xl hover:text-gray-400 duration-150 cursor-pointer"
+                    @click="onLogout" />
             </div>
 
             <BaseModal :modal-active="modalActive" @close-modal="toggleModal">
@@ -51,18 +57,57 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { RouterLink } from "vue-router";
+import { ref, computed } from "vue";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import BaseModal from "./BaseModal.vue";
+import { uid } from "uid";
+import { STORAGE_KEY } from '@/core/constants/storageKeys';
+import authService from "../services/authService";
 
 
 const modalActive = ref(false);
+const savedCities = ref([]);
+const route = useRoute();
+const router = useRouter();
+
+
+const isShowAdded = computed(() => {
+    return !route.query.id && route.name === 'cityView';
+});
+
+const isShowLogout = computed(() => {
+    return route.name !== 'loginView';
+});
 
 const toggleModal = () => {
     modalActive.value = !modalActive.value;
 };
 
+const addCity = () => {
 
+    savedCities.value = JSON.parse(localStorage.getItem(STORAGE_KEY.CITIES)) || [];
 
+    const cityObject = {
+        id: uid(),
+        state: route.params.state,
+        city: route.params.city,
+        coords: {
+            lat: route.query.lat,
+            lng: route.query.lng,
+        },
+    }
 
-</script>
+    savedCities.value.push(cityObject);
+    localStorage.setItem(STORAGE_KEY.CITIES, JSON.stringify(savedCities.value));
+
+    let query = Object.assign({}, route.query);
+    query.id = cityObject.id;
+    router.replace({ query });
+};
+
+const onLogout = () => {
+    authService.logout();
+    router.push({ name: 'loginView' });
+};
+
+</script>../services/authService

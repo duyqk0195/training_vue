@@ -4,7 +4,8 @@
             <input v-model="searchQuery" @input="getSearchResult" type="text" placeholder="Search for a city or state"
                 class="py-2 px-1 w-full bg-transparent border-b
                  focus:border-secondary focus:outline-none focus:shadow-[0px_1px_0_0_#004E71]" />
-            <ul v-if="mapboxSearchResults" class="absolute bg-secondary text-white w-full shadow-md py-2 px-1 top-[66px]">
+            <ul v-if="mapboxSearchResults"
+                class="absolute bg-secondary text-white w-full shadow-md py-2 px-1 top-[66px]">
                 <p v-if="searchError">
                     Sorry, we couldn't find any results for your search.
                 </p>
@@ -19,6 +20,15 @@
                 </template>
             </ul>
         </div>
+        <div class=" flex flex-col gap-4">
+            <Suspense>
+                <CityList />
+
+                <template #fallback>
+                    <p>Loading...</p>
+                </template>
+            </Suspense>
+        </div>
     </main>
 </template>
 
@@ -26,6 +36,8 @@
 import { ref, watch } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import CityList from '@/components/CityList.vue';
+import { STORAGE_KEY } from '@/core/constants/storageKeys';
 
 const mapboxAPIKey =
     "pk.eyJ1Ijoiam9obmtvbWFybmlja2kiLCJhIjoiY2t5NjFzODZvMHJkaDJ1bWx6OGVieGxreSJ9.IpojdT3U3NENknF6_WhR2Q";
@@ -35,6 +47,7 @@ const searchQuery = ref('');
 const queryTimeout = ref(null);
 const mapboxSearchResults = ref(null);
 const searchError = ref(false);
+
 
 const getSearchResult = async () => {
     // Clear the timeout
@@ -64,7 +77,6 @@ const getSearchResult = async () => {
 };
 
 function previewCity(result) {
-    console.log(result);
     const [city, state] = result.place_name.split(', ');
     const _state = state.replaceAll(' ', '');
     router.push({
@@ -73,7 +85,7 @@ function previewCity(result) {
         query: {
             lat: result.center[1],
             lng: result.center[0],
-            preview: false,
+            preview: true,
         }
     });
 }

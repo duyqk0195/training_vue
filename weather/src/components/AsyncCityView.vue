@@ -1,42 +1,36 @@
-
 <template>
-    <div class=" flex flex-col flex-1 items-center">
+    <div class="flex flex-col flex-1 items-center">
         <!-- Banner -->
         <div v-if="route.query.preview" class="text-white p-4 bg-secondary w-full text-center">
-            <p>You are currently previewing this city, click the "+" icon to add it to your list of cities to track.</p>
+            <p>
+                You are currently previewing this city, click the "+" icon to add it to your list
+                of cities to track.
+            </p>
         </div>
         <!-- Weather Overview -->
         <div class="flex flex-col items-center text-white py-12">
             <h1 class="text-5xl font-bold">{{ route.params.city }}</h1>
             <p class="text-sm mb-12 pt-2">
                 {{
-                    new Date(weatherData.currentTime).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'long',
-                        day: '2-digit',
-                    })
-                }}
+            new Date(weatherData.currentTime).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "long",
+                day: "2-digit",
+            })
+        }}
                 {{
-                    new Date(weatherData.currentTime).toLocaleTimeString('en-US', {
-                        timeStyle: 'short',
-                    })
-                }}
+                new Date(weatherData.currentTime).toLocaleTimeString("en-US", {
+                    timeStyle: "short",
+                })
+            }}
             </p>
             <p class="text-8xl mb-8">
-                {{
-                    Math.round((weatherData.current.temp - 32) / 1.8)
-                }}
+                {{ Math.round((weatherData.current.temp - 32) / 1.8) }}
                 &degC
             </p>
-            <p>
-                Feel like: {{
-                    Math.round((weatherData.current.feels_like - 32) / 1.8)
-                }}&degC
-            </p>
+            <p>Feel like: {{ Math.round((weatherData.current.feels_like - 32) / 1.8) }}&degC</p>
             <p class="capitalize">
-                {{
-                    weatherData.current.weather[0].description
-                }}
+                {{ weatherData.current.weather[0].description }}
             </p>
             <img class="w-150 h-auto"
                 :src="`http://openweathermap.org/img/wn/${weatherData.current.weather[0].icon}@2x.png`"
@@ -44,26 +38,22 @@
         </div>
         <hr class="border-white border-opacity-10 border w-full" />
         <!-- Hourly -->
-        <div class=" max-w-screen-md w-full py-12">
+        <div class="max-w-screen-md w-full py-12">
             <div class="mx-8 text-white">
-                <h2 class=" mb-4">Hourly Weather</h2>
+                <h2 class="mb-4">Hourly Weather</h2>
                 <div class="flex gap-10 overflow-x-scroll">
                     <div class="mb-4" v-for="hourData in weatherData.hourly" :key="hourData.dt">
                         <p class="whitespace-nowrap text-md">
                             {{
-                                new Date(hourData.currentTime).toLocaleTimeString('en-US', {
-                                    hour: 'numeric',
-                                })
-                            }}
+            new Date(hourData.currentTime).toLocaleTimeString("en-US", {
+                hour: "numeric",
+            })
+        }}
                         </p>
                         <img class="w-auto h-[50px] object-cover"
                             :src="`http://openweathermap.org/img/wn/${hourData.weather[0].icon}.png`"
                             :alt="hourData.weather[0].description" />
-                        <p class="text-sm">
-                            {{
-                                Math.round((hourData.temp - 32) / 1.8)
-                            }}&degC
-                        </p>
+                        <p class="text-sm">{{ Math.round((hourData.temp - 32) / 1.8) }}&degC</p>
                     </div>
                 </div>
             </div>
@@ -78,38 +68,39 @@
                 <h2 class="mb-4">7 Day Forecast</h2>
                 <div class="flex items-center" v-for="day in weatherData.daily" :key="day.dt">
                     <p class="flex-1">
-                        {{
-                            new Date(day.dt * 1000).toLocaleDateString('en-US', {
-                                weekday: 'long',
-                            })
-                        }}</p>
+                        {{ new Date(day.dt * 1000).toLocaleDateString("en-US", { weekday: "long" }) }}
+                    </p>
                     <img class="w-[50px] h-[50px] object-cover"
                         :src="`http://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`" />
                     <div class="flex gap-2 flex-1 justify-end">
-                        <p>
-                            H: {{
-                                Math.round((day.temp.max - 32) / 1.8)
-                            }}&degC
-                        </p>
-                        <p>
-                            L: {{
-                                Math.round((day.temp.min - 32) / 1.8)
-                            }}&degC
-                        </p>
+                        <p>H: {{ Math.round((day.temp.max - 32) / 1.8) }}&degC</p>
+                        <p>L: {{ Math.round((day.temp.min - 32) / 1.8) }}&degC</p>
                     </div>
                 </div>
             </div>
         </div>
-
+        <!-- Remove -->
+        <div v-if="isRemove"
+            class="flex items-center gap-2 py-12 text-white cursor-pointer duration-150 hover:text-red-500"
+            @click="removeCity">
+            <i class="fa-solid fa-trash"></i>
+            <p>Remove City</p>
+        </div>
     </div>
 </template>
 
 <script setup>
-import axios from 'axios';
-import { useRoute } from 'vue-router';
-import { onMounted } from 'vue';
+import axios from "axios";
+import { useRoute, useRouter } from "vue-router";
+import { onMounted, computed } from "vue";
+import { STORAGE_KEY } from "@/core/constants/storageKeys";
 
 const route = useRoute();
+const router = useRouter();
+
+const isRemove = computed(() => {
+    return route.query.id;
+});
 
 const getWeatherData = async () => {
     const { city, state } = route.params;
@@ -122,17 +113,23 @@ const getWeatherData = async () => {
         const utc = weatherData.data.current.dt * 1000 + localOffset;
         weatherData.data.currentTime = utc + 1000 * weatherData.data.timezone_offset;
 
-        weatherData.data.hourly.forEach(hour => {
+        weatherData.data.hourly.forEach((hour) => {
             const utc = hour.dt * 1000 + localOffset;
             hour.currentTime = utc + 1000 * weatherData.data.timezone_offset;
         });
         return weatherData.data;
-    } catch (error) {
-
-    }
+    } catch (error) { }
 };
 
 const weatherData = await getWeatherData();
+
+const removeCity = () => {
+    const cities = JSON.parse(localStorage.getItem(STORAGE_KEY.CITIES));
+    const newCities = cities.filter((city) => city.id !== route.query.id);
+    localStorage.setItem(STORAGE_KEY.CITIES, JSON.stringify(newCities));
+
+    router.push({ name: "home" });
+};
 </script>
 
 <style lang="scss" scoped></style>

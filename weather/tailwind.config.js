@@ -20,5 +20,8 @@ export default {
     },
   },
   plugins: [],
+  alias : {
+    '@' : 'src',
+  }
 }
 
